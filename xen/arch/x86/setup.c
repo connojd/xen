@@ -55,6 +55,8 @@
 #include <asm/spec_ctrl.h>
 #include <asm/guest.h>
 
+#include <xue.h>
+
 /* opt_nosmp: If true, secondary processors are ignored. */
 static bool __initdata opt_nosmp;
 boolean_param("nosmp", opt_nosmp);
@@ -673,6 +675,8 @@ static char * __init cmdline_cook(char *p, const char *loader_name)
     return p;
 }
 
+void __init xue_uart_init(void);
+
 void __init noreturn __start_xen(unsigned long mbi_p)
 {
     char *memmap_type = NULL;
@@ -773,6 +777,7 @@ void __init noreturn __start_xen(unsigned long mbi_p)
     ns16550.irq     = 3;
     ns16550_init(1, &ns16550);
     ehci_dbgp_init();
+    xue_uart_init();
     console_init_preirq();
 
     if ( pvh_boot )
@@ -862,7 +867,7 @@ void __init noreturn __start_xen(unsigned long mbi_p)
     }
     else if ( efi_enabled(EFI_BOOT) )
         memmap_type = "EFI";
-    else if ( (e820_raw.nr_map = 
+    else if ( (e820_raw.nr_map =
                    copy_bios_e820(e820_raw.map,
                                   ARRAY_SIZE(e820_raw.map))) != 0 )
     {
@@ -1382,7 +1387,7 @@ void __init noreturn __start_xen(unsigned long mbi_p)
         unsigned long e = min(s + PFN_UP(kexec_crash_area.size),
                               PFN_UP(__pa(HYPERVISOR_VIRT_END - 1)));
 
-        if ( e > s ) 
+        if ( e > s )
             map_pages_to_xen((unsigned long)__va(kexec_crash_area.start),
                              _mfn(s), e - s, PAGE_HYPERVISOR);
     }
@@ -1518,7 +1523,7 @@ void __init noreturn __start_xen(unsigned long mbi_p)
 
     open_softirq(NEW_TLBFLUSH_CLOCK_PERIOD_SOFTIRQ, new_tlbflush_clock_period);
 
-    if ( opt_watchdog ) 
+    if ( opt_watchdog )
         nmi_watchdog = NMI_LOCAL_APIC;
 
     find_smp_config();
@@ -1703,7 +1708,7 @@ void __init noreturn __start_xen(unsigned long mbi_p)
 
     do_initcalls();
 
-    if ( opt_watchdog ) 
+    if ( opt_watchdog )
         watchdog_setup();
 
     if ( !tboot_protect_mem_regions() )

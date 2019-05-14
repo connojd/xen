@@ -167,11 +167,11 @@ SHLIB_libxenvchan  = $(SHDEPS_libxenvchan) -Wl,-rpath-link=$(XEN_LIBVCHAN)
 
 ifeq ($(debug),y)
 # Disable optimizations
-CFLAGS += -O0 -fno-omit-frame-pointer
+CFLAGS += -O0 -fno-omit-frame-pointer -Wno-address-of-packed-member
 # But allow an override to -O0 in case Python enforces -D_FORTIFY_SOURCE=<n>.
 PY_CFLAGS += $(PY_NOOPT_CFLAGS)
 else
-CFLAGS += -O2 -fomit-frame-pointer
+CFLAGS += -O2 -fomit-frame-pointer -Wno-address-of-packed-member
 endif
 
 ifeq ($(CONFIG_BLKTAP2),y)
@@ -215,7 +215,7 @@ endif
 CFLAGS-$(CONFIG_X86_32) += $(call cc-option,$(CC),-mno-tls-direct-seg-refs)
 CFLAGS += $(CFLAGS-y)
 
-CFLAGS += $(EXTRA_CFLAGS_XEN_TOOLS)
+CFLAGS += $(EXTRA_CFLAGS_XEN_TOOLS) -Wno-address-of-packed-member
 
 INSTALL_PYTHON_PROG = \
 	$(XEN_ROOT)/tools/python/install-wrap "$(PYTHON_PATH)" $(INSTALL_PROG)
